@@ -11,11 +11,16 @@ import UIKit
 class ToDoListViewController: UITableViewController {
     
     var itemAray = ["Buy milk", "Destroy Lazy Dragon", "Do some stuff"]
+    
+    let defaults = UserDefaults.standard
 
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view, typically from a nib.
         
+        if let items = defaults.array(forKey: "ToDoListArray") as? [String] {
+            itemAray = items
+        }
     }
     
     //MARK - TableView Delegate Methods
@@ -23,8 +28,6 @@ class ToDoListViewController: UITableViewController {
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         
         let cell = tableView.dequeueReusableCell(withIdentifier: "ToDoItemCell", for: indexPath)
-        
-       // let item = itemAray[indexPath.row]
         
         cell.textLabel?.text = itemAray[indexPath.row]
         
@@ -61,6 +64,9 @@ class ToDoListViewController: UITableViewController {
         let action = UIAlertAction(title: "Add Item", style: .default) { (action) in
             //action when clicked
             self.itemAray.append(textField.text!)
+            
+            self.defaults.set(self.itemAray, forKey: "ToDoListArray")
+            
             self.tableView.reloadData()
         }
         
