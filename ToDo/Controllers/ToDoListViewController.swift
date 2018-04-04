@@ -13,17 +13,22 @@ class ToDoListViewController: UITableViewController {
     
     var itemAray = [Item]()
     
+    //Items load as soon as selectedCategory property is set with the value of selected category
+    var selectedCategory: Category? {
+        didSet {
+            loadItems()
+        }
+    }
+    
     let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
 
     override func viewDidLoad() {
         super.viewDidLoad()
         
         print(FileManager.default.urls(for: .documentDirectory, in: .userDomainMask))
-        
-        loadItems()
     }
     
-    //MARK - TableView Delegate Methods
+    //MARK: - TableView Datasource Methods
 
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         
@@ -57,7 +62,7 @@ class ToDoListViewController: UITableViewController {
         
     }
     
-    //MARK - Add new items
+    //MARK: - Add New Items
     
     @IBAction func addButtonPressed(_ sender: UIBarButtonItem) {
         
@@ -74,6 +79,9 @@ class ToDoListViewController: UITableViewController {
             let newItem = Item(context: self.context)
             newItem.title = textField.text!
             newItem.done = false
+            
+            //Specifying parentCategory of new item
+            newItem.parentCategory = self.selectedCategory
             
             self.itemAray.append(newItem)
             
@@ -95,7 +103,7 @@ class ToDoListViewController: UITableViewController {
         
     }
     
-    //MARK - Saving data method
+    //MARK: - Data Saving Method
     
     func saveItems() {
         
@@ -108,12 +116,20 @@ class ToDoListViewController: UITableViewController {
         self.tableView.reloadData()
     }
     
-    //MARK - Loading data method
+    //MARK: - Data Loading Method
     
-    //loadItems method has default value of Item.fetchRequest in case no value is provided
+    //loadItems method has default value of Item.fetchRequest and predicate in case no value is provided
     
-    func loadItems(with request: NSFetchRequest<Item> = Item.fetchRequest()) {
+    func loadItems(with request: NSFetchRequest<Item> = Item.fetchRequest(), predicate: NSPredicate? = nil) {
 
+        let categoryPredicate = NSPredicate(format: "parentCategory.name MATCHES %@", selectedCategory!.name!)
+        
+        if let additionalPredicate = predicate {
+            request.predicate = NSCompoundPredicate(andPredicateWithSubpredicates: [categoryPredicate, additionalPredicate])
+        } else {
+            request.predicate = categoryPredicate
+        }
+        
         do {
             itemAray = try context.fetch(request)
         } catch {
@@ -125,7 +141,7 @@ class ToDoListViewController: UITableViewController {
     
 }
 
-//MARK - Search bar functionality
+//MARK: - Search Bar Functionality
 
 extension ToDoListViewController: UISearchBarDelegate {
     
@@ -133,13 +149,13 @@ extension ToDoListViewController: UISearchBarDelegate {
         
         let request: NSFetchRequest<Item> = Item.fetchRequest()
         
-        request.predicate = NSPredicate(format: "title CONTAINS[cd] %@", searchBar.text!)
+        let predicate = NSPredicate(format: "title CONTAINS[cd] %@", searchBar.text!)
         
         //Sorting results (in array) ascending by title:
         
         request.sortDescriptors = [NSSortDescriptor(key: "title", ascending: true)]
         
-        loadItems(with: request)
+        loadItems(with: request, predicate: predicate)
 
     }
     
