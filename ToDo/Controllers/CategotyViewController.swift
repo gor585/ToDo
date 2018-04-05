@@ -20,7 +20,7 @@ class CategotyViewController: SwipeTableViewController {
 
         loadCategories()
         
-        tableView.rowHeight = 80.0
+        tableView.separatorStyle = .none
     }
 
     //MARK: - TableView Datasource Methods
@@ -35,6 +35,8 @@ class CategotyViewController: SwipeTableViewController {
         let cell = super.tableView(tableView, cellForRowAt: indexPath)
         
         cell.textLabel?.text = categories?[indexPath.row].name ?? "No Categories Added"
+        
+        cell.backgroundColor = UIColor(hexString: categories?[indexPath.row].rowColor ?? "FFFFFF")
         
         return cell
     }
@@ -117,6 +119,7 @@ class CategotyViewController: SwipeTableViewController {
             
             let newCategory = Category()
             newCategory.name = textField.text!
+            newCategory.rowColor = UIColor.randomFlat.hexValue()
             
             self.save(category: newCategory)
         }

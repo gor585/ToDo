@@ -15,6 +15,8 @@ class Item: Object {
     
     @objc dynamic var dateCreated: Date?
     
+    @objc dynamic var rowColor: String = ""
+    
     //Inverse relationship
     var parentCategory = LinkingObjects(fromType: Category.self, property: "items")
 }

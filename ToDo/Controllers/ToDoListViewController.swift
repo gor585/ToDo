@@ -25,8 +25,6 @@ class ToDoListViewController: SwipeTableViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        tableView.rowHeight = 80.0
-        
         print(FileManager.default.urls(for: .documentDirectory, in: .userDomainMask))
     }
     
@@ -39,6 +37,7 @@ class ToDoListViewController: SwipeTableViewController {
         if let item = todoItems?[indexPath.row] {
             cell.textLabel?.text = item.title
             cell.accessoryType = item.done == true ? .checkmark : .none
+            cell.backgroundColor = UIColor(hexString: todoItems?[indexPath.row].rowColor ?? "FFFFFF")
         } else {
             cell.textLabel?.text = "No Items Added"
         }
@@ -86,6 +85,7 @@ class ToDoListViewController: SwipeTableViewController {
                         let newItem = Item()
                         newItem.title = textField.text!
                         newItem.dateCreated = Date()
+                        newItem.rowColor = UIColor.randomFlat.hexValue()
                         
                         //saving newItem in items list of a selected category (parent relationship)
                         currentCategory.items.append(newItem)
@@ -112,6 +112,8 @@ class ToDoListViewController: SwipeTableViewController {
         present(alert, animated: true, completion: nil)
         
     }
+    
+    //MARK: - Data Deleting Method
     
     override func updateModel(at indexPath: IndexPath) {
         if let itemToDelete = todoItems?[indexPath.row] {
