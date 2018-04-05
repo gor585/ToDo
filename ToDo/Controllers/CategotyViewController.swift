@@ -9,7 +9,7 @@
 import UIKit
 import RealmSwift
 
-class CategotyViewController: UITableViewController {
+class CategotyViewController: SwipeTableViewController {
     
     let realm = try! Realm()
     
@@ -19,6 +19,8 @@ class CategotyViewController: UITableViewController {
         super.viewDidLoad()
 
         loadCategories()
+        
+        tableView.rowHeight = 80.0
     }
 
     //MARK: - TableView Datasource Methods
@@ -29,7 +31,8 @@ class CategotyViewController: UITableViewController {
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         
-        let cell = tableView.dequeueReusableCell(withIdentifier: "CategoryCell", for: indexPath)
+        //Entering superclass (SwipeTableViewController)
+        let cell = super.tableView(tableView, cellForRowAt: indexPath)
         
         cell.textLabel?.text = categories?[indexPath.row].name ?? "No Categories Added"
         
@@ -53,7 +56,6 @@ class CategotyViewController: UITableViewController {
             destinationVC.selectedCategory = categories?[indexPath.row]
             
         }
-        
     }
     
     
@@ -71,6 +73,22 @@ class CategotyViewController: UITableViewController {
         
         tableView.reloadData()
     }
+    
+    
+    //MARK: - Data Deleteting Method
+    
+    override func updateModel(at indexPath: IndexPath) {
+        if let categoryToDelete = categories?[indexPath.row] {
+            do {
+                try realm.write {
+                    realm.delete(categoryToDelete)
+                }
+            } catch {
+                print("Error deleting category: \(error)")
+            }
+        }
+    }
+    
     
     //MARK: - Data Loading Method
     
@@ -108,6 +126,5 @@ class CategotyViewController: UITableViewController {
         present(alert, animated: true, completion: nil)
         
     }
-    
-    
 }
+
